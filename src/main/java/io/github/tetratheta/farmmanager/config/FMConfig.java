@@ -7,16 +7,21 @@ import io.github.tetratheta.mol.config.BaseConfig;
 import io.github.tetratheta.mol.message.MessageChannel;
 import io.github.tetratheta.mol.message.MessageService;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /// Loads, normalizes, and persists FarmManager configuration values.
 public final class FMConfig extends BaseConfig {
   private static final String PATH_BYPASS_SNEAK = "bypass.sneak-to-break-immature";
   private static final String PATH_CHAT_COOLDOWN = "notification.chat-cooldown-ticks";
+  private static final String PATH_COMPOSTER_ENABLED = "composter.enabled";
+  private static final String PATH_COMPOSTER_ITEMS = "composter.items";
   private static final String PATH_NOTIFICATION_CHANNEL = "notification.channel";
   private static final String PATH_CROPS = "crops.materials";
   private static final String PATH_HARVEST_ADD_TO_INVENTORY = "harvest.add-to-inventory";
@@ -50,6 +55,31 @@ public final class FMConfig extends BaseConfig {
   public List<String> getConfiguredCropMaterials() {
     return getStringList(
         PATH_CROPS, List.of("BEETROOTS", "CARROTS", "NETHER_WART", "POTATOES", "WHEAT"));
+  }
+
+  /// Returns whether custom composter handling is enabled.
+  ///
+  /// @return true when configured composter items should be handled by FarmManager
+  public boolean isComposterEnabled() {
+    return getBoolean(PATH_COMPOSTER_ENABLED, true);
+  }
+
+  /// Returns normalized custom composter chances keyed by Bukkit material.
+  ///
+  /// @return configured composter chances
+  public Map<Material, Double> getComposterChances() {
+    Map<Material, Double> chances = new LinkedHashMap<>();
+    ConfigurationSection items = getConfig().getConfigurationSection(PATH_COMPOSTER_ITEMS);
+    if (items == null) return chances;
+
+    for (String key : items.getKeys(false)) {
+      Material material = Material.matchMaterial(key);
+      double chance = items.getDouble(key, -1.0);
+      if (material == null) continue;
+
+      chances.put(material, normalizeComposterChance(chance));
+    }
+    return chances;
   }
 
   /// Returns whether immature crop protection is enabled.
@@ -164,6 +194,8 @@ public final class FMConfig extends BaseConfig {
       MessageService messageService, CropRegistry cropRegistry, RegionService regionService) {
     boolean changed = validateOverflowPolicy(messageService);
     changed |= validateNotificationChannel(messageService);
+    changed |= validateComposterEnabled();
+    changed |= validateComposterItems();
     changed |= validateCropMaterials(cropRegistry);
     changed |= validateWatchedRegions(regionService);
     return changed;
@@ -201,6 +233,72 @@ public final class FMConfig extends BaseConfig {
     messageService.logWarning("log.config.invalid-notification-channel", configured);
     getConfig().set(PATH_NOTIFICATION_CHANNEL, MessageChannel.ACTION_BAR.configValue());
     return true;
+  }
+
+  /// Ensures the composter enabled flag exists.
+  ///
+  /// @return true when the configuration was changed
+  private boolean validateComposterEnabled() {
+    if (getConfig().isSet(PATH_COMPOSTER_ENABLED)) return false;
+
+    getConfig().set(PATH_COMPOSTER_ENABLED, true);
+    return true;
+  }
+
+  /// Writes back valid composter material chances after invalid entries have been normalized.
+  ///
+  /// @return true when the configuration was changed
+  private boolean validateComposterItems() {
+    if (!getConfig().isConfigurationSection(PATH_COMPOSTER_ITEMS)) {
+      if (getConfig().isSet(PATH_COMPOSTER_ITEMS)) getConfig().set(PATH_COMPOSTER_ITEMS, null);
+      getConfig().set("composter.items.ROTTEN_FLESH", 0.3);
+      return true;
+    }
+
+    Map<String, Double> normalized = new LinkedHashMap<>();
+    ConfigurationSection items = getConfig().getConfigurationSection(PATH_COMPOSTER_ITEMS);
+    if (items == null) return false;
+
+    for (String key : items.getKeys(false)) {
+      Material material = Material.matchMaterial(key);
+      if (material == null) {
+        getPlugin().getLogger().warning("Skipping invalid composter material: " + key);
+        continue;
+      }
+
+      double configuredChance = items.getDouble(key, -1.0);
+      double normalizedChance = normalizeComposterChance(configuredChance);
+      if (Double.compare(configuredChance, normalizedChance) != 0) {
+        getPlugin()
+            .getLogger()
+            .warning(
+                "Clamping composter chance for "
+                    + key
+                    + " from "
+                    + configuredChance
+                    + " to "
+                    + normalizedChance);
+      }
+
+      normalized.put(material.name(), normalizedChance);
+    }
+
+    Map<String, Double> configured = new LinkedHashMap<>();
+    for (String key : items.getKeys(false)) configured.put(key, items.getDouble(key, -1.0));
+    if (configured.equals(normalized)) return false;
+
+    getConfig().set(PATH_COMPOSTER_ITEMS, normalized);
+    return true;
+  }
+
+  /// Keeps composter chances inside Bukkit's probability range.
+  ///
+  /// @param chance configured chance
+  /// @return chance clamped to the inclusive `0.0` to `1.0` range
+  private double normalizeComposterChance(double chance) {
+    if (chance < 0.0) return 0.0;
+    if (chance > 1.0) return 1.0;
+    return chance;
   }
 
   /// Writes back the active crop material list after invalid entries have been ignored.

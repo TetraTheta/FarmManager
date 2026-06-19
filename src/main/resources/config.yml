@@ -2,6 +2,18 @@
 bypass:
   # Allows sneaking players to break immature crops even when protection is enabled.
   sneak-to-break-immature: true
+
+# Custom composter behavior applied server-wide.
+composter:
+  # Handles configured items with FarmManager's custom composter chance rules.
+  enabled: true
+  # Bukkit Material names and their level increase chance from 0.0 to 1.0.
+  # Example: 0.65 means 65%, while 1.0 means always.
+  # Level 0 composters always increase to level 1 when a configured item is accepted.
+  items:
+    POISONOUS_POTATO: 0.65
+    ROTTEN_FLESH: 0.65
+
 # Bukkit Material names that are allowed to be handled as crops.
 # Material.matchMaterial() is used, then FarmManager keeps only supported crop descriptors.
 crops:
@@ -11,6 +23,7 @@ crops:
     - NETHER_WART
     - POTATOES
     - WHEAT
+
 # Automatic harvest and replant behavior for mature crops.
 harvest:
   # Adds drops to the player's inventory before applying the overflow policy.
@@ -24,8 +37,10 @@ harvest:
   # discard: keep inserted items and delete only the leftovers.
   # keep: if any item would not fit, drop the whole harvest at the broken crop instead.
   overflow: drop
+
 # Server-wide language code used by bundled files under languages/.
 language: 'ko'
+
 # Notification behavior for repeated gameplay messages.
 notification:
   # Player-facing gameplay notification location.
@@ -34,6 +49,7 @@ notification:
   channel: action-bar
   # Chat notifications are throttled per player and message key. Action bar and command replies are never throttled.
   chat-cooldown-ticks: 40
+
 # Protection rules inside watched regions.
 protection:
   farmland:
@@ -45,6 +61,7 @@ protection:
     creative: false
     # Cancels immature crop breaks inside watched regions.
     enabled: true
+
 # WorldGuard regions where FarmManager should adjust crop breaking.
 # Entries are normalized as "world:region". Commands may add bare region names for a player's current world.
 regions:

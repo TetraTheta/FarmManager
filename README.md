@@ -3,7 +3,7 @@
 </p>
 
 # FarmManager
-**FarmManager protects and replants crops inside selected WorldGuard regions on Paper servers**
+**FarmManager protects and replants crops in selected WorldGuard regions and customizes composters on Paper servers**
 
 ![Version](https://img.shields.io/modrinth/v/farmmanager?style=for-the-badge&label=Plugin%20Version)
 ![Game Version](https://img.shields.io/modrinth/game-versions/farmmanager?style=for-the-badge&label=Minecraft%20Version)<br>
@@ -15,9 +15,11 @@
 
 FarmManager helps server owners turn selected WorldGuard regions into managed farm areas on Paper servers with WorldEdit and WorldGuard installed. Inside watched regions, immature crops can be protected from accidental breaking, while mature crops can be harvested, delivered to the player, and replanted automatically.
 
-The plugin only acts in WorldGuard regions that you explicitly add with `/fm region add`. This keeps ordinary survival farming unchanged outside managed farm areas and lets each server decide exactly where automatic behavior belongs.
+Crop protection, crop harvesting, and farmland trampling protection only act in WorldGuard regions that you explicitly add with `/fm region add`. This keeps ordinary survival farming unchanged outside managed farm areas and lets each server decide exactly where automatic crop behavior belongs.
 
-By default, FarmManager supports wheat, carrots, potatoes, beetroots, and nether wart. Server owners can disable individual crop materials in the configuration, adjust Creative mode behavior for protection and harvesting separately, choose how full inventories are handled, protect farmland from trampling, and allow sneaking players to bypass immature crop protection.
+FarmManager also applies configurable composter rules server-wide. Server owners can add new compostable items or override the compost chance of existing compostable items for both player right-clicks and hopper automation.
+
+By default, FarmManager supports wheat, carrots, potatoes, beetroots, and nether wart for crop management, and rotten flesh as a custom composter item. Server owners can disable individual crop materials in the configuration, adjust Creative mode behavior for protection and harvesting separately, choose how full inventories are handled, protect farmland from trampling, allow sneaking players to bypass immature crop protection, and configure composter item chances.
 
 Use `/fm reload` after editing the configuration to apply changes without restarting the server.
 
@@ -28,6 +30,17 @@ Use `/fm reload` after editing the configuration to apply changes without restar
 bypass:
   # Allows sneaking players to break immature crops even when protection is enabled.
   sneak-to-break-immature: true
+
+# Custom composter behavior applied server-wide.
+composter:
+  # Handles configured items with FarmManager's custom composter chance rules.
+  enabled: true
+  # Bukkit Material names and their level increase chance from 0.0 to 1.0.
+  # Example: 0.65 means 65%, while 1.0 means always.
+  # Level 0 composters always increase to level 1 when a configured item is accepted.
+  items:
+    POISONOUS_POTATO: 0.65
+    ROTTEN_FLESH: 0.65
 
 # Bukkit Material names that are allowed to be handled as crops.
 # Material.matchMaterial() is used, then FarmManager keeps only supported crop descriptors.
@@ -83,7 +96,12 @@ regions:
   watched: []
 ```
 
-FarmManager validates recoverable configuration values during startup and reload. Invalid overflow policies fall back to `drop`, invalid notification channels fall back to `action-bar`, unsupported crop materials are removed from `crops.materials`, and watched regions that no longer exist in WorldGuard are removed from the saved list.
+FarmManager validates recoverable configuration values during startup and reload.
+- Invalid overflow policies fall back to `drop`.
+- Invalid notification channels fall back to `action-bar`.
+- Unsupported crop materials are removed from `crops.materials`.
+- Invalid composter materials are removed from `composter.items`, while chances outside `0.0` to `1.0` are clamped to the nearest valid value.
+- Watched regions that no longer exist in WorldGuard are removed from the saved list.
 
 ## Commands
 
@@ -107,6 +125,8 @@ Immature crop protection cancels the break before the crop is destroyed. If `byp
 Farmland trampling protection cancels entity-caused farmland-to-dirt changes inside watched regions when `protection.farmland.trampling.enabled` is enabled. This cancellation is silent and does not send a chat notification.
 
 For mature crops, FarmManager calculates Bukkit drops using the player's held tool and player context, disables the original block drops, then finishes the harvest on the next tick only if the crop block actually became air. One replant item is consumed from the calculated drops before the crop is planted again at age zero.
+
+Custom composter handling is server-wide, not limited to watched WorldGuard regions. When a configured item is inserted by player right-click or hopper, FarmManager cancels the vanilla insertion and applies the configured chance. A level `0` composter always increases to level `1` when it accepts a configured item. Levels `1` through `6` use the configured chance, failed rolls still consume one item, and a successful fill from level `6` makes the composter ready for bone meal. Items not listed under `composter.items` keep their vanilla composter behavior.
 
 Supported crop materials:
 
