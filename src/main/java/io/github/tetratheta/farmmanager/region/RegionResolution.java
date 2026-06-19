@@ -1,4 +1,4 @@
-package io.github.tetratheta.autoregionfarm.region;
+package io.github.tetratheta.farmmanager.region;
 
 /// Represents the result of resolving user command input into a WorldGuard region key.
 ///

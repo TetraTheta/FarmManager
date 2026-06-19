@@ -1,20 +1,20 @@
-package io.github.tetratheta.autoregionfarm.service;
+package io.github.tetratheta.farmmanager.service;
 
-import io.github.tetratheta.autoregionfarm.config.ARFConfig;
-import io.github.tetratheta.autoregionfarm.region.RegionService;
+import io.github.tetratheta.farmmanager.config.FMConfig;
+import io.github.tetratheta.farmmanager.region.RegionService;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 /// Decides whether protected farmland block changes should be cancelled.
 public final class FarmlandProtectionService {
-  private final ARFConfig config;
+  private final FMConfig config;
   private final RegionService regionService;
 
   /// Creates a farmland protection service.
   ///
   /// @param config active configuration
   /// @param regionService active region service
-  public FarmlandProtectionService(ARFConfig config, RegionService regionService) {
+  public FarmlandProtectionService(FMConfig config, RegionService regionService) {
     this.config = config;
     this.regionService = regionService;
   }

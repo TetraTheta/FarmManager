@@ -1,6 +1,6 @@
-package io.github.tetratheta.autoregionfarm.listener;
+package io.github.tetratheta.farmmanager.listener;
 
-import io.github.tetratheta.autoregionfarm.service.FarmlandProtectionService;
+import io.github.tetratheta.farmmanager.service.FarmlandProtectionService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

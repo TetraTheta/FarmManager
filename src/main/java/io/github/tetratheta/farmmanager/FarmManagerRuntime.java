@@ -1,19 +1,19 @@
-package io.github.tetratheta.autoregionfarm;
+package io.github.tetratheta.farmmanager;
 
-import io.github.tetratheta.autoregionfarm.config.ARFConfig;
-import io.github.tetratheta.autoregionfarm.crop.CropRegistry;
-import io.github.tetratheta.autoregionfarm.listener.CropBreakListener;
-import io.github.tetratheta.autoregionfarm.listener.FarmlandTramplingListener;
-import io.github.tetratheta.autoregionfarm.region.RegionService;
-import io.github.tetratheta.autoregionfarm.service.FarmlandProtectionService;
-import io.github.tetratheta.autoregionfarm.service.HarvestService;
-import io.github.tetratheta.autoregionfarm.service.NotificationService;
+import io.github.tetratheta.farmmanager.config.FMConfig;
+import io.github.tetratheta.farmmanager.crop.CropRegistry;
+import io.github.tetratheta.farmmanager.listener.CropBreakListener;
+import io.github.tetratheta.farmmanager.listener.FarmlandTramplingListener;
+import io.github.tetratheta.farmmanager.region.RegionService;
+import io.github.tetratheta.farmmanager.service.FarmlandProtectionService;
+import io.github.tetratheta.farmmanager.service.HarvestService;
+import io.github.tetratheta.farmmanager.service.NotificationService;
 import io.github.tetratheta.mol.message.MessageService;
 import io.github.tetratheta.mol.plugin.PluginRuntime;
 
 /// Wires configuration-backed services and Bukkit resources for one plugin runtime.
-public final class AutoRegionFarmRuntime extends PluginRuntime {
-  private final ARFConfig config;
+public final class FarmManagerRuntime extends PluginRuntime {
+  private final FMConfig config;
   private final CropRegistry cropRegistry;
   private final FarmlandProtectionService farmlandProtectionService;
   private final HarvestService harvestService;
@@ -24,9 +24,9 @@ public final class AutoRegionFarmRuntime extends PluginRuntime {
   /// Creates all services from the current disk configuration and registers runtime listeners.
   ///
   /// @param plugin plugin entry point that owns this runtime
-  public AutoRegionFarmRuntime(AutoRegionFarm plugin) {
+  public FarmManagerRuntime(FarmManager plugin) {
     super(plugin);
-    config = new ARFConfig(plugin);
+    config = new FMConfig(plugin);
     messageService = new MessageService(plugin, config.getLanguage());
     cropRegistry = new CropRegistry(config.getConfiguredCropMaterials(), messageService);
     regionService = new RegionService(config.getWatchedRegions(), messageService);
@@ -54,7 +54,7 @@ public final class AutoRegionFarmRuntime extends PluginRuntime {
   /// Returns the active configuration facade.
   ///
   /// @return active configuration facade
-  public ARFConfig getConfig() {
+  public FMConfig getConfig() {
     return config;
   }
 

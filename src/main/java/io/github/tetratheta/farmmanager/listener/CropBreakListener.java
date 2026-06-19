@@ -1,12 +1,12 @@
-package io.github.tetratheta.autoregionfarm.listener;
+package io.github.tetratheta.farmmanager.listener;
 
-import io.github.tetratheta.autoregionfarm.AutoRegionFarm;
-import io.github.tetratheta.autoregionfarm.config.ARFConfig;
-import io.github.tetratheta.autoregionfarm.crop.CropDescriptor;
-import io.github.tetratheta.autoregionfarm.crop.CropRegistry;
-import io.github.tetratheta.autoregionfarm.region.RegionService;
-import io.github.tetratheta.autoregionfarm.service.HarvestService;
-import io.github.tetratheta.autoregionfarm.service.NotificationService;
+import io.github.tetratheta.farmmanager.FarmManager;
+import io.github.tetratheta.farmmanager.config.FMConfig;
+import io.github.tetratheta.farmmanager.crop.CropDescriptor;
+import io.github.tetratheta.farmmanager.crop.CropRegistry;
+import io.github.tetratheta.farmmanager.region.RegionService;
+import io.github.tetratheta.farmmanager.service.HarvestService;
+import io.github.tetratheta.farmmanager.service.NotificationService;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -23,11 +23,11 @@ import org.bukkit.inventory.ItemStack;
 
 /// Coordinates crop break protection and automatic harvest behavior.
 public final class CropBreakListener implements Listener {
-  private final ARFConfig config;
+  private final FMConfig config;
   private final CropRegistry cropRegistry;
   private final HarvestService harvestService;
   private final NotificationService notificationService;
-  private final AutoRegionFarm plugin;
+  private final FarmManager plugin;
   private final RegionService regionService;
   private final Consumer<Runnable> taskRunner;
 
@@ -41,8 +41,8 @@ public final class CropBreakListener implements Listener {
   /// @param notificationService gameplay notification service
   /// @param taskRunner runtime-owned task runner
   public CropBreakListener(
-      AutoRegionFarm plugin,
-      ARFConfig config,
+      FarmManager plugin,
+      FMConfig config,
       CropRegistry cropRegistry,
       RegionService regionService,
       HarvestService harvestService,

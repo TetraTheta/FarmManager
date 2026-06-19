@@ -1,8 +1,8 @@
-package io.github.tetratheta.autoregionfarm.service;
+package io.github.tetratheta.farmmanager.service;
 
-import io.github.tetratheta.autoregionfarm.config.ARFConfig;
-import io.github.tetratheta.autoregionfarm.config.OverflowPolicy;
-import io.github.tetratheta.autoregionfarm.crop.CropDescriptor;
+import io.github.tetratheta.farmmanager.config.FMConfig;
+import io.github.tetratheta.farmmanager.config.OverflowPolicy;
+import io.github.tetratheta.farmmanager.crop.CropDescriptor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,14 +16,14 @@ import org.bukkit.inventory.PlayerInventory;
 
 /// Calculates, delivers, and replants automatic crop harvests.
 public final class HarvestService {
-  private final ARFConfig config;
+  private final FMConfig config;
   private final NotificationService notificationService;
 
   /// Creates a harvest service.
   ///
   /// @param config active plugin configuration
   /// @param notificationService gameplay notification service
-  public HarvestService(ARFConfig config, NotificationService notificationService) {
+  public HarvestService(FMConfig config, NotificationService notificationService) {
     this.config = config;
     this.notificationService = notificationService;
   }

@@ -1,4 +1,4 @@
-package io.github.tetratheta.autoregionfarm.region;
+package io.github.tetratheta.farmmanager.region;
 
 import java.util.Locale;
 import java.util.Optional;

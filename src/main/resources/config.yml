@@ -3,7 +3,7 @@ bypass:
   # Allows sneaking players to break immature crops even when protection is enabled.
   sneak-to-break-immature: true
 # Bukkit Material names that are allowed to be handled as crops.
-# Material.matchMaterial() is used, then AutoRegionFarm keeps only supported crop descriptors.
+# Material.matchMaterial() is used, then FarmManager keeps only supported crop descriptors.
 crops:
   materials:
     - BEETROOTS
@@ -45,7 +45,7 @@ protection:
     creative: false
     # Cancels immature crop breaks inside watched regions.
     enabled: true
-# WorldGuard regions where AutoRegionFarm should adjust crop breaking.
+# WorldGuard regions where FarmManager should adjust crop breaking.
 # Entries are normalized as "world:region". Commands may add bare region names for a player's current world.
 regions:
   watched: []

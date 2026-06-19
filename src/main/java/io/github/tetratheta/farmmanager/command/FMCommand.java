@@ -1,4 +1,4 @@
-package io.github.tetratheta.autoregionfarm.command;
+package io.github.tetratheta.farmmanager.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -7,10 +7,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.github.tetratheta.autoregionfarm.AutoRegionFarm;
-import io.github.tetratheta.autoregionfarm.AutoRegionFarmRuntime;
-import io.github.tetratheta.autoregionfarm.region.RegionKey;
-import io.github.tetratheta.autoregionfarm.region.RegionResolution;
+import io.github.tetratheta.farmmanager.FarmManager;
+import io.github.tetratheta.farmmanager.FarmManagerRuntime;
+import io.github.tetratheta.farmmanager.region.RegionKey;
+import io.github.tetratheta.farmmanager.region.RegionResolution;
 import io.github.tetratheta.mol.message.MessageService;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -22,25 +22,25 @@ import java.util.concurrent.CompletableFuture;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-/// Builds and executes the `/arf` command tree.
-public final class ARFCommand {
+/// Builds and executes the `/fm` command tree.
+public final class FMCommand {
   private static final String ARG_REGION = "region";
-  private static final String PERMISSION_ADMIN = "autoregionfarm.admin";
+  private static final String PERMISSION_ADMIN = "farmmanager.admin";
 
-  private final AutoRegionFarm plugin;
+  private final FarmManager plugin;
 
   /// Creates the root command builder.
   ///
   /// @param plugin plugin entry point used to access active services
-  public ARFCommand(AutoRegionFarm plugin) {
+  public FMCommand(FarmManager plugin) {
     this.plugin = plugin;
   }
 
-  /// Builds the root `/arf` command.
+  /// Builds the root `/fm` command.
   ///
   /// @return Brigadier command node registered during the command lifecycle event
   public LiteralCommandNode<CommandSourceStack> getCommand() {
-    return Commands.literal("arf")
+    return Commands.literal("fm")
         .executes(this::listRegions)
         .then(getReloadCommand())
         .then(getRegionCommand())
@@ -187,7 +187,7 @@ public final class ARFCommand {
   /// Returns the active runtime.
   ///
   /// @return active runtime
-  private AutoRegionFarmRuntime runtime() {
+  private FarmManagerRuntime runtime() {
     return plugin.getRuntime();
   }
 

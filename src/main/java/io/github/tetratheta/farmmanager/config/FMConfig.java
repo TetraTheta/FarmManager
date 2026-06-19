@@ -1,8 +1,8 @@
-package io.github.tetratheta.autoregionfarm.config;
+package io.github.tetratheta.farmmanager.config;
 
-import io.github.tetratheta.autoregionfarm.crop.CropRegistry;
-import io.github.tetratheta.autoregionfarm.region.RegionKey;
-import io.github.tetratheta.autoregionfarm.region.RegionService;
+import io.github.tetratheta.farmmanager.crop.CropRegistry;
+import io.github.tetratheta.farmmanager.region.RegionKey;
+import io.github.tetratheta.farmmanager.region.RegionService;
 import io.github.tetratheta.mol.config.BaseConfig;
 import io.github.tetratheta.mol.message.MessageChannel;
 import io.github.tetratheta.mol.message.MessageService;
@@ -13,8 +13,8 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/// Loads, normalizes, and persists AutoRegionFarm configuration values.
-public final class ARFConfig extends BaseConfig {
+/// Loads, normalizes, and persists FarmManager configuration values.
+public final class FMConfig extends BaseConfig {
   private static final String PATH_BYPASS_SNEAK = "bypass.sneak-to-break-immature";
   private static final String PATH_CHAT_COOLDOWN = "notification.chat-cooldown-ticks";
   private static final String PATH_NOTIFICATION_CHANNEL = "notification.channel";
@@ -33,7 +33,7 @@ public final class ARFConfig extends BaseConfig {
   /// Creates a configuration facade bound to the provided plugin instance.
   ///
   /// @param provided plugin instance that owns the Bukkit configuration
-  public ARFConfig(JavaPlugin provided) {
+  public FMConfig(JavaPlugin provided) {
     super(provided);
   }
 

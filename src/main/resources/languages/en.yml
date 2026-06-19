@@ -1,5 +1,5 @@
 command:
-  no-permission: You do not have permission to use AutoRegionFarm commands.
+  no-permission: You do not have permission to use FarmManager commands.
   region:
     added: 'Now watching WorldGuard region: {0}'
     already-watched: 'That region is already watched: {0}'
@@ -13,7 +13,7 @@ command:
     removed: 'Stopped watching WorldGuard region: {0}'
     unknown-world: 'World was not found: {0}'
   reload:
-    success: AutoRegionFarm configuration has been reloaded.
+    success: FarmManager configuration has been reloaded.
 log:
   config:
     invalid-crop-material: 'Ignoring an unknown crop material: {0}'

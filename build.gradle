@@ -72,7 +72,7 @@ processResources {
 // Publish
 modrinth {
   token = env.fetch("MODRINTH_TOKEN") //System.getenv("MODRINTH_TOKEN")
-  projectId = "autoregionfarm"
+  projectId = "farmmanager"
   versionType = releaseChannel
   uploadFile = jar
   gameVersions = [verMC]

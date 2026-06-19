@@ -1,4 +1,4 @@
-package io.github.tetratheta.autoregionfarm.region;
+package io.github.tetratheta.farmmanager.region;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;

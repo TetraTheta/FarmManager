@@ -1,4 +1,4 @@
-package io.github.tetratheta.autoregionfarm.crop;
+package io.github.tetratheta.farmmanager.crop;
 
 import org.bukkit.Material;
 

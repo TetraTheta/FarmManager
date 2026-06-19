@@ -1,4 +1,4 @@
-package io.github.tetratheta.autoregionfarm.crop;
+package io.github.tetratheta.farmmanager.crop;
 
 import io.github.tetratheta.mol.message.MessageService;
 import java.util.Collection;
@@ -44,7 +44,7 @@ public final class CropRegistry {
     }
   }
 
-  /// Returns whether a material is supported by AutoRegionFarm.
+  /// Returns whether a material is supported by FarmManager.
   ///
   /// @param material material to check
   /// @return true when the material has a built-in crop descriptor

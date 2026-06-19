@@ -11,10 +11,10 @@ dependencies:
       load: BEFORE
       required: true
 load: POSTWORLD
-main: io.github.tetratheta.autoregionfarm.AutoRegionFarm
-name: AutoRegionFarm
+main: io.github.tetratheta.farmmanager.FarmManager
+name: FarmManager
 version: '${version}'
 permissions:
-  autoregionfarm.admin:
+  farmmanager.admin:
     default: op
-    description: Manage AutoRegionFarm settings and watched WorldGuard regions
+    description: Manage FarmManager settings and watched WorldGuard regions

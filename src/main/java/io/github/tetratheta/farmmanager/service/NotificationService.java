@@ -1,4 +1,4 @@
-package io.github.tetratheta.autoregionfarm.service;
+package io.github.tetratheta.farmmanager.service;
 
 import io.github.tetratheta.mol.message.MessageChannel;
 import io.github.tetratheta.mol.message.MessageService;
