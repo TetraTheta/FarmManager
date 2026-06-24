@@ -33,21 +33,17 @@ public final class CropBreakListener implements Listener {
 
   /// Creates the crop break listener.
   ///
-  /// @param plugin plugin entry point
-  /// @param config active configuration
-  /// @param cropRegistry active crop registry
-  /// @param regionService active region service
-  /// @param harvestService harvest service
+  /// @param plugin              plugin entry point
+  /// @param config              active configuration
+  /// @param cropRegistry        active crop registry
+  /// @param regionService       active region service
+  /// @param harvestService      harvest service
   /// @param notificationService gameplay notification service
-  /// @param taskRunner runtime-owned task runner
+  /// @param taskRunner          runtime-owned task runner
   public CropBreakListener(
-      FarmManager plugin,
-      FMConfig config,
-      CropRegistry cropRegistry,
-      RegionService regionService,
-      HarvestService harvestService,
-      NotificationService notificationService,
-      Consumer<Runnable> taskRunner) {
+    FarmManager plugin, FMConfig config, CropRegistry cropRegistry, RegionService regionService,
+    HarvestService harvestService, NotificationService notificationService, Consumer<Runnable> taskRunner
+  ) {
     this.plugin = plugin;
     this.config = config;
     this.cropRegistry = cropRegistry;
@@ -67,19 +63,15 @@ public final class CropBreakListener implements Listener {
     if (descriptor.isEmpty()) return;
     if (!regionService.isWatched(block.getLocation())) return;
     if (!(block.getBlockData() instanceof Ageable ageable)) return;
-
     Player player = event.getPlayer();
     boolean creative = player.getGameMode() == GameMode.CREATIVE;
     boolean mature = ageable.getAge() >= ageable.getMaximumAge();
-
     if (!mature && shouldProtectImmature(player, creative)) {
       event.setCancelled(true);
       notificationService.send(player, "notification.immature-crop");
       return;
     }
-
     if (!mature || !shouldHarvest(creative)) return;
-
     ItemStack tool = player.getInventory().getItemInMainHand();
     Collection<ItemStack> drops = block.getDrops(tool, player);
     Location location = block.getLocation();
@@ -90,7 +82,7 @@ public final class CropBreakListener implements Listener {
 
   /// Returns whether immature crop protection should apply to this break.
   ///
-  /// @param player player who broke the crop
+  /// @param player   player who broke the crop
   /// @param creative true when the player is in Creative mode
   /// @return true when the break should be cancelled
   private boolean shouldProtectImmature(Player player, boolean creative) {
@@ -110,15 +102,13 @@ public final class CropBreakListener implements Listener {
 
   /// Completes harvest only when the original crop was actually broken.
   ///
-  /// @param player player who broke the crop
-  /// @param location original crop location
+  /// @param player     player who broke the crop
+  /// @param location   original crop location
   /// @param descriptor crop descriptor
-  /// @param drops calculated drops
-  private void finishHarvest(
-      Player player, Location location, CropDescriptor descriptor, Collection<ItemStack> drops) {
+  /// @param drops      calculated drops
+  private void finishHarvest(Player player, Location location, CropDescriptor descriptor, Collection<ItemStack> drops) {
     if (!plugin.isEnabled()) return;
     if (!location.getBlock().getType().isAir()) return;
-
     harvestService.harvestAndReplant(player, location, descriptor, drops);
   }
 }

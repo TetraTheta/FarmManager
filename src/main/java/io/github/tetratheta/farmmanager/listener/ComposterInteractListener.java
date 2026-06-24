@@ -30,21 +30,17 @@ public final class ComposterInteractListener implements Listener {
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onPlayerCompost(PlayerInteractEvent event) {
     if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-
     Block block = event.getClickedBlock();
     if (block == null || block.getType() != Material.COMPOSTER) return;
-
     ItemStack item = event.getItem();
     if (item == null || item.getType().isAir() || item.getAmount() <= 0) return;
     if (!composterService.isConfiguredMaterial(item.getType())) return;
     if (isDuplicateOffHandEvent(event)) return;
     if (!composterService.canAccept(block, item.getType())) return;
-
     event.setCancelled(true);
     composterService.consumeOne(item);
     Optional<CompostResult> result = composterService.compost(block, item.getType());
     if (result.isEmpty()) return;
-
     composterService.playCompostSound(block, result.get());
     if (result.get().successful()) composterService.spawnComposterParticles(block);
   }
@@ -55,7 +51,6 @@ public final class ComposterInteractListener implements Listener {
   /// @return true when this off-hand event should be ignored
   private boolean isDuplicateOffHandEvent(PlayerInteractEvent event) {
     if (event.getHand() != EquipmentSlot.OFF_HAND) return false;
-
     ItemStack mainHand = event.getPlayer().getInventory().getItemInMainHand();
     return composterService.isConfiguredMaterial(mainHand.getType());
   }

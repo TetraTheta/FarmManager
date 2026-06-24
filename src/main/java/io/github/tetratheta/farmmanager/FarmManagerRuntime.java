@@ -35,27 +35,15 @@ public final class FarmManagerRuntime extends PluginRuntime {
     messageService = new MessageService(plugin, config.getLanguage());
     cropRegistry = new CropRegistry(config.getConfiguredCropMaterials(), messageService);
     regionService = new RegionService(config.getWatchedRegions(), messageService);
-
     boolean changed = config.validateAndFix(messageService, cropRegistry, regionService);
     if (changed) config.saveConfig();
-
-    notificationService =
-        new NotificationService(
-            messageService, config.getNotificationChannel(), config.getChatCooldownTicks());
+    notificationService = new NotificationService(messageService, config.getNotificationChannel(), config.getChatCooldownTicks());
     composterService = new ComposterService(config);
     harvestService = new HarvestService(config, notificationService);
     farmlandProtectionService = new FarmlandProtectionService(config, regionService);
     registerListener(new ComposterInteractListener(composterService));
     registerListener(new ComposterHopperListener(composterService, this::runTask));
-    registerListener(
-        new CropBreakListener(
-            plugin,
-            config,
-            cropRegistry,
-            regionService,
-            harvestService,
-            notificationService,
-            this::runTask));
+    registerListener(new CropBreakListener(plugin, config, cropRegistry, regionService, harvestService, notificationService, this::runTask));
     registerListener(new FarmlandTramplingListener(farmlandProtectionService));
   }
 

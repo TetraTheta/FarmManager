@@ -4,8 +4,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /// Base class for Paper plugins that rebuild their services as a single runtime object.
 ///
-/// Subclasses provide the concrete runtime through `createRuntime()` and put non-runtime startup
-/// work, such as command lifecycle registration, in `onPluginEnabled()`.
+/// Subclasses provide the concrete runtime through `createRuntime()` and put non-runtime startup work, such as command lifecycle registration, in
+/// `onPluginEnabled()`.
 ///
 /// Example:
 /// ```java
@@ -24,20 +24,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class BasePlugin<R extends PluginRuntime> extends JavaPlugin {
   private R runtime;
 
-  /// Creates the runtime and then runs subclass startup hooks.
-  ///
-  /// Bukkit calls this method when the plugin is enabled. Subclasses should use `createRuntime()`
-  /// and `onPluginEnabled()` instead of overriding this method.
-  @Override
-  public final void onEnable() {
-    runtime = createRuntime();
-    onPluginEnabled();
-  }
-
   /// Runs subclass shutdown hooks and releases the active runtime.
   ///
-  /// Bukkit calls this method when the plugin is disabled. Subclasses should use
-  /// `onPluginDisabled()` and runtime `terminate()` overrides instead of overriding this method.
+  /// Bukkit calls this method when the plugin is disabled. Subclasses should use `onPluginDisabled()` and runtime `terminate()` overrides instead of
+  /// overriding this method.
   @Override
   public final void onDisable() {
     onPluginDisabled();
@@ -45,6 +35,16 @@ public abstract class BasePlugin<R extends PluginRuntime> extends JavaPlugin {
       runtime.terminate();
       runtime = null;
     }
+  }
+
+  /// Creates the runtime and then runs subclass startup hooks.
+  ///
+  /// Bukkit calls this method when the plugin is enabled. Subclasses should use `createRuntime()` and `onPluginEnabled()` instead of overriding this
+  /// method.
+  @Override
+  public final void onEnable() {
+    runtime = createRuntime();
+    onPluginEnabled();
   }
 
   /// Creates a new runtime from the plugin's current configuration state.
@@ -56,8 +56,7 @@ public abstract class BasePlugin<R extends PluginRuntime> extends JavaPlugin {
 
   /// Runs after the initial runtime is created.
   ///
-  /// Use this hook for startup work that needs an active runtime, such as Paper lifecycle command
-  /// registration.
+  /// Use this hook for startup work that needs an active runtime, such as Paper lifecycle command registration.
   protected void onPluginEnabled() {}
 
   /// Runs before the active runtime is terminated.

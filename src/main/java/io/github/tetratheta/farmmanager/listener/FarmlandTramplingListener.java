@@ -23,7 +23,6 @@ public final class FarmlandTramplingListener implements Listener {
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onEntityChangeBlock(EntityChangeBlockEvent event) {
     if (!farmlandProtectionService.shouldCancelTrampling(event.getBlock(), event.getTo())) return;
-
     event.setCancelled(true);
   }
 }

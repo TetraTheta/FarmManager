@@ -28,7 +28,7 @@ public final class RegionService {
   /// Creates a region service from configured watched region entries.
   ///
   /// @param configuredRegions configured `world:region` entries
-  /// @param messageService localized message service used for warnings
+  /// @param messageService    localized message service used for warnings
   public RegionService(List<String> configuredRegions, MessageService messageService) {
     regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
     watchedRegions = new LinkedHashSet<>();
@@ -38,19 +38,36 @@ public final class RegionService {
         messageService.logWarning("log.config.invalid-region-format", configuredRegion);
         continue;
       }
-
       RegionKey region = parsedRegion.get();
       if (Bukkit.getWorld(region.worldName()) == null) {
         messageService.logWarning("log.config.unknown-world", region.worldName());
         continue;
       }
-
       if (!exists(region)) {
         messageService.logWarning("log.config.unknown-region", region.asString());
         continue;
       }
       watchedRegions.add(region);
     }
+  }
+
+  /// Returns whether a WorldGuard region exists.
+  ///
+  /// @param region region key to test
+  /// @return true when the world and region exist
+  public boolean exists(RegionKey region) {
+    World world = Bukkit.getWorld(region.worldName());
+    if (world == null) return false;
+    RegionManager manager = getRegionManager(world);
+    return manager != null && manager.getRegion(region.regionId()) != null;
+  }
+
+  /// Returns the WorldGuard region manager for one Bukkit world.
+  ///
+  /// @param world Bukkit world
+  /// @return region manager, or null when unavailable
+  private RegionManager getRegionManager(World world) {
+    return regionContainer.get(BukkitAdapter.adapt(world));
   }
 
   /// Returns normalized watched region keys.
@@ -67,42 +84,24 @@ public final class RegionService {
   public boolean isWatched(Location location) {
     World world = location.getWorld();
     if (world == null) return false;
-
     RegionManager manager = getRegionManager(world);
     if (manager == null) return false;
-
     BlockVector3 point = BlockVector3.at(location.blockX(), location.blockY(), location.blockZ());
     for (RegionKey region : watchedRegions) {
       if (!region.worldName().equalsIgnoreCase(world.getName())) continue;
-
       ProtectedRegion protectedRegion = manager.getRegion(region.regionId());
       if (protectedRegion != null && protectedRegion.contains(point)) return true;
     }
     return false;
   }
 
-  /// Returns whether a WorldGuard region exists.
-  ///
-  /// @param region region key to test
-  /// @return true when the world and region exist
-  public boolean exists(RegionKey region) {
-    World world = Bukkit.getWorld(region.worldName());
-    if (world == null) return false;
-
-    RegionManager manager = getRegionManager(world);
-    return manager != null && manager.getRegion(region.regionId()) != null;
-  }
-
   /// Resolves command input into a WorldGuard region.
   ///
-  /// @param input raw command input
+  /// @param input  raw command input
   /// @param sender command sender
   /// @return resolution result
   public RegionResolution resolveCommandInput(String input, CommandSender sender) {
-    if (input == null || input.isBlank()) {
-      return RegionResolution.failed(RegionResolution.Status.INVALID_FORMAT);
-    }
-
+    if (input == null || input.isBlank()) return RegionResolution.failed(RegionResolution.Status.INVALID_FORMAT);
     if (input.contains(":")) return resolveExplicit(input);
     if (sender instanceof Player player) return resolveInWorld(player.getWorld(), input);
     return resolveBareConsoleRegion(input);
@@ -110,36 +109,23 @@ public final class RegionService {
 
   /// Returns command suggestions for region inputs.
   ///
-  /// @param sender command sender
-  /// @param remaining current argument text
+  /// @param sender      command sender
+  /// @param remaining   current argument text
   /// @param watchedOnly true when suggestions should be limited to watched regions
   /// @return suggestion strings
   public List<String> suggest(CommandSender sender, String remaining, boolean watchedOnly) {
     String input = remaining == null ? "" : remaining;
     String lowerInput = input.toLowerCase(Locale.ROOT);
-
-    List<String> candidates =
-        watchedOnly ? watchedRegions.stream().map(RegionKey::asString).toList() : allRegionKeys();
-    if (sender instanceof Player player && !input.contains(":") && !watchedOnly) {
-      candidates = regionIdsInWorld(player.getWorld());
-    }
-
+    List<String> candidates = watchedOnly ? watchedRegions.stream().map(RegionKey::asString).toList() : allRegionKeys();
+    if (sender instanceof Player player && !input.contains(":") && !watchedOnly) candidates = regionIdsInWorld(player.getWorld());
     if (input.contains(":") && !watchedOnly) {
       int separatorIndex = input.indexOf(':');
       String worldName = input.substring(0, separatorIndex);
       World world = Bukkit.getWorld(worldName);
-      if (world != null) {
-        candidates =
-            regionIdsInWorld(world).stream()
-                .map(regionId -> world.getName() + ":" + regionId)
-                .toList();
-      }
+      if (world != null) candidates = regionIdsInWorld(world).stream().map(regionId -> world.getName() + ":" + regionId).toList();
     }
-
-    return candidates.stream()
-        .filter(candidate -> candidate.toLowerCase(Locale.ROOT).startsWith(lowerInput))
-        .sorted(String.CASE_INSENSITIVE_ORDER)
-        .toList();
+    return candidates.stream().filter(candidate -> candidate.toLowerCase(Locale.ROOT).startsWith(lowerInput)).sorted(String.CASE_INSENSITIVE_ORDER)
+                     .toList();
   }
 
   /// Adds a watched region to this runtime service.
@@ -170,10 +156,7 @@ public final class RegionService {
   /// @return resolution result
   private RegionResolution resolveExplicit(String input) {
     Optional<RegionKey> parsedRegion = RegionKey.parse(input);
-    if (parsedRegion.isEmpty()) {
-      return RegionResolution.failed(RegionResolution.Status.INVALID_FORMAT);
-    }
-
+    if (parsedRegion.isEmpty()) return RegionResolution.failed(RegionResolution.Status.INVALID_FORMAT);
     RegionKey region = parsedRegion.get();
     World world = Bukkit.getWorld(region.worldName());
     if (world == null) return RegionResolution.failed(RegionResolution.Status.UNKNOWN_WORLD);
@@ -183,7 +166,7 @@ public final class RegionService {
 
   /// Resolves a bare region name in a specific world.
   ///
-  /// @param world world used as context
+  /// @param world    world used as context
   /// @param regionId bare region ID
   /// @return resolution result
   private RegionResolution resolveInWorld(World world, String regionId) {
@@ -202,11 +185,8 @@ public final class RegionService {
       RegionKey region = new RegionKey(world.getName(), regionId);
       if (exists(region)) matches.add(region);
     }
-
     if (matches.isEmpty()) return RegionResolution.failed(RegionResolution.Status.NOT_FOUND);
-    if (matches.size() > 1) {
-      return RegionResolution.failed(RegionResolution.Status.AMBIGUOUS_CONSOLE_REGION);
-    }
+    if (matches.size() > 1) return RegionResolution.failed(RegionResolution.Status.AMBIGUOUS_CONSOLE_REGION);
     return RegionResolution.resolved(matches.getFirst());
   }
 
@@ -230,13 +210,5 @@ public final class RegionService {
     RegionManager manager = getRegionManager(world);
     if (manager == null) return List.of();
     return manager.getRegions().keySet().stream().sorted(String.CASE_INSENSITIVE_ORDER).toList();
-  }
-
-  /// Returns the WorldGuard region manager for one Bukkit world.
-  ///
-  /// @param world Bukkit world
-  /// @return region manager, or null when unavailable
-  private RegionManager getRegionManager(World world) {
-    return regionContainer.get(BukkitAdapter.adapt(world));
   }
 }

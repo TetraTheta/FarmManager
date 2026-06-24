@@ -6,13 +6,12 @@ import java.util.Optional;
 /// Identifies a WorldGuard region by Bukkit world name and region ID.
 ///
 /// @param worldName Bukkit world name
-/// @param regionId WorldGuard region ID
+/// @param regionId  WorldGuard region ID
 public record RegionKey(String worldName, String regionId) {
-
   /// Creates a normalized region key.
   ///
   /// @param worldName Bukkit world name
-  /// @param regionId WorldGuard region ID
+  /// @param regionId  WorldGuard region ID
   public RegionKey {
     worldName = worldName.strip();
     regionId = regionId.strip();
@@ -26,18 +25,10 @@ public record RegionKey(String worldName, String regionId) {
     if (value == null) return Optional.empty();
     int separatorIndex = value.indexOf(':');
     if (separatorIndex <= 0 || separatorIndex == value.length() - 1) return Optional.empty();
-
     String worldName = value.substring(0, separatorIndex).strip();
     String regionId = value.substring(separatorIndex + 1).strip();
     if (worldName.isBlank() || regionId.isBlank()) return Optional.empty();
     return Optional.of(new RegionKey(worldName, regionId));
-  }
-
-  /// Returns the stable configuration representation.
-  ///
-  /// @return `world:region` string
-  public String asString() {
-    return worldName + ":" + regionId;
   }
 
   /// Returns whether this key has the same world and region ignoring case.
@@ -53,5 +44,12 @@ public record RegionKey(String worldName, String regionId) {
   /// @return lower-case lookup key
   public String lookupKey() {
     return asString().toLowerCase(Locale.ROOT);
+  }
+
+  /// Returns the stable configuration representation.
+  ///
+  /// @return `world:region` string
+  public String asString() {
+    return worldName + ":" + regionId;
   }
 }

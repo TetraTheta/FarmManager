@@ -12,20 +12,19 @@ import org.bukkit.Material;
 
 /// Resolves configured crop materials into supported crop descriptors.
 public final class CropRegistry {
-  private static final Map<Material, CropDescriptor> SUPPORTED_CROPS =
-      Map.of(
-          Material.WHEAT, new CropDescriptor(Material.WHEAT, Material.WHEAT_SEEDS),
-          Material.CARROTS, new CropDescriptor(Material.CARROTS, Material.CARROT),
-          Material.POTATOES, new CropDescriptor(Material.POTATOES, Material.POTATO),
-          Material.BEETROOTS, new CropDescriptor(Material.BEETROOTS, Material.BEETROOT_SEEDS),
-          Material.NETHER_WART, new CropDescriptor(Material.NETHER_WART, Material.NETHER_WART));
-
+  private static final Map<Material, CropDescriptor> SUPPORTED_CROPS = Map.of(
+    Material.BEETROOTS, new CropDescriptor(Material.BEETROOTS, Material.BEETROOT_SEEDS),
+    Material.CARROTS, new CropDescriptor(Material.CARROTS, Material.CARROT),
+    Material.NETHER_WART, new CropDescriptor(Material.NETHER_WART, Material.NETHER_WART),
+    Material.POTATOES, new CropDescriptor(Material.POTATOES, Material.POTATO),
+    Material.WHEAT, new CropDescriptor(Material.WHEAT, Material.WHEAT_SEEDS)
+  );
   private final Map<Material, CropDescriptor> activeCrops;
 
   /// Creates a crop registry from configured material names.
   ///
   /// @param configuredMaterials configured material names
-  /// @param messageService localized message service used for warnings
+  /// @param messageService      localized message service used for warnings
   public CropRegistry(List<String> configuredMaterials, MessageService messageService) {
     activeCrops = new LinkedHashMap<>();
     for (String configuredMaterial : configuredMaterials) {
@@ -34,7 +33,6 @@ public final class CropRegistry {
         messageService.logWarning("log.config.invalid-crop-material", configuredMaterial);
         continue;
       }
-
       CropDescriptor descriptor = SUPPORTED_CROPS.get(material);
       if (descriptor == null) {
         messageService.logWarning("log.config.unsupported-crop-material", material.name());

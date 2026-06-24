@@ -15,13 +15,11 @@ import org.bukkit.inventory.ItemStack;
 
 /// Applies configured composter chances to accepted item insertions.
 ///
-/// Empty composters are filled once before chance-based behavior starts, matching vanilla
-/// expectations for the first accepted item.
+/// Empty composters are filled once before chance-based behavior starts, matching vanilla expectations for the first accepted item.
 public final class ComposterService {
   private static final int BONE_MEAL_READY_LEVEL = 8;
   private static final int GUARANTEED_FILL_LEVEL = 0;
   private static final int LAST_FILLABLE_LEVEL = 6;
-
   private final FMConfig config;
   private final Map<Material, Double> chances;
 
@@ -33,6 +31,41 @@ public final class ComposterService {
     chances = config.getComposterChances();
   }
 
+  /// Attempts to compost one configured item into the target block.
+  ///
+  /// @param block    target composter block
+  /// @param material accepted item material
+  /// @return compost result, or empty when the block cannot accept the item
+  public Optional<CompostResult> compost(Block block, Material material) {
+    if (!canAccept(block, material)) return Optional.empty();
+    BlockData blockData = block.getBlockData();
+    if (!(blockData instanceof Levelled composter)) return Optional.empty();
+    boolean successful = shouldIncreaseLevel(composter.getLevel(), chances.get(material));
+    if (!successful) return Optional.of(CompostResult.failed());
+    composter.setLevel(composter.getLevel() + 1);
+    block.setBlockData(composter);
+    if (composter.getLevel() == LAST_FILLABLE_LEVEL + 1) {
+      composter.setLevel(BONE_MEAL_READY_LEVEL);
+      block.setBlockData(composter);
+      return Optional.of(CompostResult.ready());
+    }
+    return Optional.of(CompostResult.filled());
+  }
+
+  /// Returns whether the target block can accept one configured compost item now.
+  ///
+  /// @param block    target composter block
+  /// @param material accepted item material
+  /// @return true when one item can be consumed for custom composting
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  public boolean canAccept(Block block, Material material) {
+    if (!isConfiguredMaterial(material)) return false;
+    if (block.getType() != Material.COMPOSTER) return false;
+    BlockData blockData = block.getBlockData();
+    if (!(blockData instanceof Levelled composter)) return false;
+    return composter.getLevel() <= LAST_FILLABLE_LEVEL;
+  }
+
   /// Returns whether FarmManager should handle this material for composting.
   ///
   /// @param material item material
@@ -41,61 +74,26 @@ public final class ComposterService {
     return config.isComposterEnabled() && chances.containsKey(material);
   }
 
-  /// Returns whether the target block can accept one configured compost item now.
+  /// Returns whether this insertion should raise the composter level.
   ///
-  /// @param block target composter block
-  /// @param material accepted item material
-  /// @return true when one item can be consumed for custom composting
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public boolean canAccept(Block block, Material material) {
-    if (!isConfiguredMaterial(material)) return false;
-    if (block.getType() != Material.COMPOSTER) return false;
-
-    BlockData blockData = block.getBlockData();
-    if (!(blockData instanceof Levelled composter)) return false;
-
-    return composter.getLevel() <= LAST_FILLABLE_LEVEL;
-  }
-
-  /// Attempts to compost one configured item into the target block.
-  ///
-  /// @param block target composter block
-  /// @param material accepted item material
-  /// @return compost result, or empty when the block cannot accept the item
-  public Optional<CompostResult> compost(Block block, Material material) {
-    if (!canAccept(block, material)) return Optional.empty();
-
-    BlockData blockData = block.getBlockData();
-    if (!(blockData instanceof Levelled composter)) return Optional.empty();
-
-    boolean successful = shouldIncreaseLevel(composter.getLevel(), chances.get(material));
-    if (!successful) return Optional.of(CompostResult.failed());
-
-    composter.setLevel(composter.getLevel() + 1);
-    block.setBlockData(composter);
-    if (composter.getLevel() == LAST_FILLABLE_LEVEL + 1) {
-      composter.setLevel(BONE_MEAL_READY_LEVEL);
-      block.setBlockData(composter);
-      return Optional.of(CompostResult.ready());
-    }
-
-    return Optional.of(CompostResult.filled());
+  /// @param currentLevel current composter level
+  /// @param chance       configured chance from 0.0 to 1.0
+  /// @return true when the level should increase
+  private boolean shouldIncreaseLevel(int currentLevel, double chance) {
+    return currentLevel == GUARANTEED_FILL_LEVEL || ThreadLocalRandom.current().nextDouble() <= chance;
   }
 
   /// Plays the vanilla-like sound for a compost result.
   ///
-  /// @param block target composter block
+  /// @param block  target composter block
   /// @param result compost result
   public void playCompostSound(Block block, CompostResult result) {
     if (!result.successful()) {
       block.getWorld().playSound(block.getLocation(), Sound.BLOCK_COMPOSTER_FILL, 1.0f, 1.0f);
       return;
     }
-
     block.getWorld().playSound(block.getLocation(), Sound.BLOCK_COMPOSTER_FILL_SUCCESS, 1.0f, 1.0f);
-    if (result.completed()) {
-      block.getWorld().playSound(block.getLocation(), Sound.BLOCK_COMPOSTER_READY, 1.0f, 1.0f);
-    }
+    if (result.completed()) block.getWorld().playSound(block.getLocation(), Sound.BLOCK_COMPOSTER_READY, 1.0f, 1.0f);
   }
 
   /// Spawns vanilla-like composter particles above the target block.
@@ -120,16 +118,6 @@ public final class ComposterService {
   /// @param itemStack stack to decrement
   public void consumeOne(ItemStack itemStack) {
     itemStack.setAmount(itemStack.getAmount() - 1);
-  }
-
-  /// Returns whether this insertion should raise the composter level.
-  ///
-  /// @param currentLevel current composter level
-  /// @param chance configured chance from 0.0 to 1.0
-  /// @return true when the level should increase
-  private boolean shouldIncreaseLevel(int currentLevel, double chance) {
-    return currentLevel == GUARANTEED_FILL_LEVEL
-        || ThreadLocalRandom.current().nextDouble() <= chance;
   }
 
   /// Describes the outcome of one accepted compost item.

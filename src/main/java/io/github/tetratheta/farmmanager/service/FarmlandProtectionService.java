@@ -12,7 +12,7 @@ public final class FarmlandProtectionService {
 
   /// Creates a farmland protection service.
   ///
-  /// @param config active configuration
+  /// @param config        active configuration
   /// @param regionService active region service
   public FarmlandProtectionService(FMConfig config, RegionService regionService) {
     this.config = config;
@@ -21,7 +21,7 @@ public final class FarmlandProtectionService {
 
   /// Returns whether an entity-caused block change should preserve farmland.
   ///
-  /// @param block source block that may be trampled
+  /// @param block          source block that may be trampled
   /// @param targetMaterial material the event wants to change into
   /// @return true when the block change should be cancelled
   public boolean shouldCancelTrampling(Block block, Material targetMaterial) {

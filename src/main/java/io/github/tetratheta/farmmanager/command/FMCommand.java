@@ -26,7 +26,6 @@ import org.bukkit.entity.Player;
 public final class FMCommand {
   private static final String ARG_REGION = "region";
   private static final String PERMISSION_ADMIN = "farmmanager.admin";
-
   private final FarmManager plugin;
 
   /// Creates the root command builder.
@@ -40,45 +39,31 @@ public final class FMCommand {
   ///
   /// @return Brigadier command node registered during the command lifecycle event
   public LiteralCommandNode<CommandSourceStack> getCommand() {
-    return Commands.literal("fm")
-        .executes(this::listRegions)
-        .then(getReloadCommand())
-        .then(getRegionCommand())
-        .build();
+    return Commands.literal("fm").executes(this::listRegions).then(getReloadCommand()).then(getRegionCommand()).build();
   }
 
   /// Builds the reload subcommand.
   ///
   /// @return reload command builder
   private LiteralArgumentBuilder<CommandSourceStack> getReloadCommand() {
-    return Commands.literal("reload")
-        .executes(
-            ctx -> {
-              if (!ensureAdmin(ctx)) return Command.SINGLE_SUCCESS;
-
-              CommandSender sender = ctx.getSource().getSender();
-              plugin.reloadRuntime();
-              plugin.getRuntime().getMessageService().send(sender, "command.reload.success");
-              return Command.SINGLE_SUCCESS;
-            });
+    return Commands.literal("reload").executes(ctx -> {
+      if (!ensureAdmin(ctx)) return Command.SINGLE_SUCCESS;
+      CommandSender sender = ctx.getSource().getSender();
+      plugin.reloadRuntime();
+      plugin.getRuntime().getMessageService().send(sender, "command.reload.success");
+      return Command.SINGLE_SUCCESS;
+    });
   }
 
   /// Builds the region subcommand tree.
   ///
   /// @return region command builder
   private LiteralArgumentBuilder<CommandSourceStack> getRegionCommand() {
-    return Commands.literal("region")
-        .executes(this::listRegions)
-        .then(
-            Commands.literal("add")
-                .then(
-                    Commands.argument(ARG_REGION, StringArgumentType.greedyString())
-                        .suggests((ctx, builder) -> suggestRegions(ctx, builder, false))
-                        .executes(this::addRegion)))
-        .then(getRemoveCommand("del"))
-        .then(getRemoveCommand("delete"))
-        .then(getRemoveCommand("remove"))
-        .then(Commands.literal("list").executes(this::listRegions));
+    return Commands.literal("region").executes(this::listRegions).then(Commands.literal("add").then(
+                     Commands.argument(ARG_REGION, StringArgumentType.greedyString()).suggests((ctx, builder) -> suggestRegions(ctx, builder, false))
+                             .executes(this::addRegion))).then(getRemoveCommand("del")).then(getRemoveCommand("delete")).then(getRemoveCommand(
+                     "remove"))
+                   .then(Commands.literal("list").executes(this::listRegions));
   }
 
   /// Builds one remove alias.
@@ -86,11 +71,9 @@ public final class FMCommand {
   /// @param alias remove alias
   /// @return remove command builder
   private LiteralArgumentBuilder<CommandSourceStack> getRemoveCommand(String alias) {
-    return Commands.literal(alias)
-        .then(
-            Commands.argument(ARG_REGION, StringArgumentType.greedyString())
-                .suggests((ctx, builder) -> suggestRegions(ctx, builder, true))
-                .executes(this::removeRegion));
+    return Commands.literal(alias).then(
+      Commands.argument(ARG_REGION, StringArgumentType.greedyString()).suggests((ctx, builder) -> suggestRegions(ctx, builder, true))
+              .executes(this::removeRegion));
   }
 
   /// Adds a watched WorldGuard region.
@@ -100,19 +83,16 @@ public final class FMCommand {
   @SuppressWarnings("SameReturnValue")
   private int addRegion(CommandContext<CommandSourceStack> ctx) {
     if (!ensureAdmin(ctx)) return Command.SINGLE_SUCCESS;
-
     CommandSender sender = ctx.getSource().getSender();
     MessageService messages = runtime().getMessageService();
     String input = StringArgumentType.getString(ctx, ARG_REGION);
     RegionResolution resolution = runtime().getRegionService().resolveCommandInput(input, sender);
     if (sendResolutionFailure(sender, input, resolution)) return Command.SINGLE_SUCCESS;
-
     RegionKey region = resolution.region();
     if (runtime().getRegionService().isWatchedRegion(region)) {
       messages.send(sender, "command.region.already-watched", region.asString());
       return Command.SINGLE_SUCCESS;
     }
-
     runtime().getRegionService().addWatchedRegion(region);
     runtime().getConfig().addWatchedRegion(region);
     runtime().getConfig().saveConfig();
@@ -127,7 +107,6 @@ public final class FMCommand {
   @SuppressWarnings("SameReturnValue")
   private int removeRegion(CommandContext<CommandSourceStack> ctx) {
     if (!ensureAdmin(ctx)) return Command.SINGLE_SUCCESS;
-
     CommandSender sender = ctx.getSource().getSender();
     MessageService messages = runtime().getMessageService();
     String input = StringArgumentType.getString(ctx, ARG_REGION);
@@ -136,7 +115,6 @@ public final class FMCommand {
       messages.send(sender, "command.region.not-watched", input);
       return Command.SINGLE_SUCCESS;
     }
-
     RegionKey region = resolvedRegion.get();
     runtime().getRegionService().removeWatchedRegion(region);
     runtime().getConfig().removeWatchedRegion(region);
@@ -152,7 +130,6 @@ public final class FMCommand {
   @SuppressWarnings("SameReturnValue")
   private int listRegions(CommandContext<CommandSourceStack> ctx) {
     if (!ensureAdmin(ctx)) return Command.SINGLE_SUCCESS;
-
     CommandSender sender = ctx.getSource().getSender();
     MessageService messages = runtime().getMessageService();
     Set<RegionKey> watchedRegions = runtime().getRegionService().getWatchedRegions();
@@ -160,27 +137,20 @@ public final class FMCommand {
       messages.send(sender, "command.region.empty-list");
       return Command.SINGLE_SUCCESS;
     }
-
     messages.send(sender, "command.region.list-header");
-    for (RegionKey region : watchedRegions) {
-      messages.send(sender, "command.region.list-entry", region.asString());
-    }
+    for (RegionKey region : watchedRegions) messages.send(sender, "command.region.list-entry", region.asString());
     return Command.SINGLE_SUCCESS;
   }
 
   /// Sends suggestions for region arguments.
   ///
-  /// @param ctx command context
-  /// @param builder suggestions builder
+  /// @param ctx         command context
+  /// @param builder     suggestions builder
   /// @param watchedOnly true when only watched regions should be suggested
   /// @return suggestion future
-  private CompletableFuture<Suggestions> suggestRegions(
-      CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder, boolean watchedOnly) {
+  private CompletableFuture<Suggestions> suggestRegions(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder, boolean watchedOnly) {
     CommandSender sender = ctx.getSource().getSender();
-    for (String suggestion :
-        runtime().getRegionService().suggest(sender, builder.getRemaining(), watchedOnly)) {
-      builder.suggest(suggestion);
-    }
+    for (String suggestion : runtime().getRegionService().suggest(sender, builder.getRemaining(), watchedOnly)) builder.suggest(suggestion);
     return builder.buildFuture();
   }
 
@@ -199,25 +169,21 @@ public final class FMCommand {
   private boolean ensureAdmin(CommandContext<CommandSourceStack> ctx) {
     CommandSender sender = ctx.getSource().getSender();
     if (sender.hasPermission(PERMISSION_ADMIN)) return true;
-
     runtime().getMessageService().send(sender, "command.no-permission");
     return false;
   }
 
   /// Sends a localized message for failed command input resolution.
   ///
-  /// @param sender command sender
-  /// @param input raw user input
+  /// @param sender     command sender
+  /// @param input      raw user input
   /// @param resolution resolution result
   /// @return true when a failure was sent
-  private boolean sendResolutionFailure(
-      CommandSender sender, String input, RegionResolution resolution) {
+  private boolean sendResolutionFailure(CommandSender sender, String input, RegionResolution resolution) {
     if (resolution.status() == RegionResolution.Status.RESOLVED) return false;
-
     MessageService messages = runtime().getMessageService();
     switch (resolution.status()) {
-      case AMBIGUOUS_CONSOLE_REGION ->
-          messages.send(sender, "command.region.ambiguous-console-region", input);
+      case AMBIGUOUS_CONSOLE_REGION -> messages.send(sender, "command.region.ambiguous-console-region", input);
       case INVALID_FORMAT -> messages.send(sender, "command.region.invalid-format", input);
       case NOT_FOUND -> messages.send(sender, "command.region.not-found", input);
       case UNKNOWN_WORLD -> messages.send(sender, "command.region.unknown-world", input);
@@ -227,7 +193,7 @@ public final class FMCommand {
 
   /// Resolves input against the watched list so stale regions can still be removed.
   ///
-  /// @param input raw command input
+  /// @param input  raw command input
   /// @param sender command sender
   /// @return watched region key, or empty when not watched or ambiguous
   private Optional<RegionKey> resolveWatchedInput(String input, CommandSender sender) {
@@ -235,7 +201,6 @@ public final class FMCommand {
       Optional<RegionKey> parsedRegion = RegionKey.parse(input);
       return parsedRegion.filter(region -> runtime().getRegionService().isWatchedRegion(region));
     }
-
     List<RegionKey> candidates = new ArrayList<>();
     if (sender instanceof Player player) {
       RegionKey region = new RegionKey(player.getWorld().getName(), input);
@@ -245,7 +210,6 @@ public final class FMCommand {
         if (region.regionId().equalsIgnoreCase(input)) candidates.add(region);
       }
     }
-
     return candidates.size() == 1 ? Optional.of(candidates.getFirst()) : Optional.empty();
   }
 }

@@ -22,17 +22,16 @@ public final class FMConfig extends BaseConfig {
   private static final String PATH_CHAT_COOLDOWN = "notification.chat-cooldown-ticks";
   private static final String PATH_COMPOSTER_ENABLED = "composter.enabled";
   private static final String PATH_COMPOSTER_ITEMS = "composter.items";
-  private static final String PATH_NOTIFICATION_CHANNEL = "notification.channel";
   private static final String PATH_CROPS = "crops.materials";
   private static final String PATH_HARVEST_ADD_TO_INVENTORY = "harvest.add-to-inventory";
   private static final String PATH_HARVEST_CREATIVE = "harvest.creative";
   private static final String PATH_HARVEST_ENABLED = "harvest.enabled";
   private static final String PATH_HARVEST_OVERFLOW = "harvest.overflow";
   private static final String PATH_LANGUAGE = "language";
-  private static final String PATH_PROTECTION_FARMLAND_TRAMPLING =
-      "protection.farmland.trampling.enabled";
+  private static final String PATH_NOTIFICATION_CHANNEL = "notification.channel";
   private static final String PATH_PROTECTION_CREATIVE = "protection.immature.creative";
   private static final String PATH_PROTECTION_ENABLED = "protection.immature.enabled";
+  private static final String PATH_PROTECTION_FARMLAND_TRAMPLING = "protection.farmland.trampling.enabled";
   private static final String PATH_WATCHED_REGIONS = "regions.watched";
 
   /// Creates a configuration facade bound to the provided plugin instance.
@@ -53,8 +52,7 @@ public final class FMConfig extends BaseConfig {
   ///
   /// @return configured crop material names
   public List<String> getConfiguredCropMaterials() {
-    return getStringList(
-        PATH_CROPS, List.of("BEETROOTS", "CARROTS", "NETHER_WART", "POTATOES", "WHEAT"));
+    return getStringList(PATH_CROPS, List.of("BEETROOTS", "CARROTS", "NETHER_WART", "POTATOES", "WHEAT"));
   }
 
   /// Returns whether custom composter handling is enabled.
@@ -71,15 +69,22 @@ public final class FMConfig extends BaseConfig {
     Map<Material, Double> chances = new LinkedHashMap<>();
     ConfigurationSection items = getConfig().getConfigurationSection(PATH_COMPOSTER_ITEMS);
     if (items == null) return chances;
-
     for (String key : items.getKeys(false)) {
       Material material = Material.matchMaterial(key);
       double chance = items.getDouble(key, -1.0);
       if (material == null) continue;
-
       chances.put(material, normalizeComposterChance(chance));
     }
     return chances;
+  }
+
+  /// Keeps composter chances inside Bukkit's probability range.
+  ///
+  /// @param chance configured chance
+  /// @return chance clamped to the inclusive `0.0` to `1.0` range
+  private double normalizeComposterChance(double chance) {
+    if (chance < 0.0) return 0.0;
+    return Math.min(chance, 1.0);
   }
 
   /// Returns whether immature crop protection is enabled.
@@ -187,11 +192,10 @@ public final class FMConfig extends BaseConfig {
   /// Normalizes recoverable configuration values before runtime services use them.
   ///
   /// @param messageService localized message service used for warnings
-  /// @param cropRegistry active crop registry
-  /// @param regionService active region service
+  /// @param cropRegistry   active crop registry
+  /// @param regionService  active region service
   /// @return true when configuration values were changed and should be saved
-  public boolean validateAndFix(
-      MessageService messageService, CropRegistry cropRegistry, RegionService regionService) {
+  public boolean validateAndFix(MessageService messageService, CropRegistry cropRegistry, RegionService regionService) {
     boolean changed = validateOverflowPolicy(messageService);
     changed |= validateNotificationChannel(messageService);
     changed |= validateComposterEnabled();
@@ -212,7 +216,6 @@ public final class FMConfig extends BaseConfig {
       getConfig().set(PATH_HARVEST_OVERFLOW, policy.configValue());
       return !configured.equals(policy.configValue());
     }
-
     messageService.logWarning("log.config.invalid-overflow-policy", configured);
     getConfig().set(PATH_HARVEST_OVERFLOW, OverflowPolicy.DROP.configValue());
     return true;
@@ -229,7 +232,6 @@ public final class FMConfig extends BaseConfig {
       getConfig().set(PATH_NOTIFICATION_CHANNEL, channel.configValue());
       return !configured.equals(channel.configValue());
     }
-
     messageService.logWarning("log.config.invalid-notification-channel", configured);
     getConfig().set(PATH_NOTIFICATION_CHANNEL, MessageChannel.ACTION_BAR.configValue());
     return true;
@@ -240,7 +242,6 @@ public final class FMConfig extends BaseConfig {
   /// @return true when the configuration was changed
   private boolean validateComposterEnabled() {
     if (getConfig().isSet(PATH_COMPOSTER_ENABLED)) return false;
-
     getConfig().set(PATH_COMPOSTER_ENABLED, true);
     return true;
   }
@@ -254,51 +255,26 @@ public final class FMConfig extends BaseConfig {
       getConfig().set("composter.items.ROTTEN_FLESH", 0.3);
       return true;
     }
-
     Map<String, Double> normalized = new LinkedHashMap<>();
     ConfigurationSection items = getConfig().getConfigurationSection(PATH_COMPOSTER_ITEMS);
     if (items == null) return false;
-
     for (String key : items.getKeys(false)) {
       Material material = Material.matchMaterial(key);
       if (material == null) {
         getPlugin().getLogger().warning("Skipping invalid composter material: " + key);
         continue;
       }
-
       double configuredChance = items.getDouble(key, -1.0);
       double normalizedChance = normalizeComposterChance(configuredChance);
-      if (Double.compare(configuredChance, normalizedChance) != 0) {
-        getPlugin()
-            .getLogger()
-            .warning(
-                "Clamping composter chance for "
-                    + key
-                    + " from "
-                    + configuredChance
-                    + " to "
-                    + normalizedChance);
-      }
-
+      if (Double.compare(configuredChance, normalizedChance) != 0)
+        getPlugin().getLogger().warning("Clamping composter chance for " + key + " from " + configuredChance + " to " + normalizedChance);
       normalized.put(material.name(), normalizedChance);
     }
-
     Map<String, Double> configured = new LinkedHashMap<>();
     for (String key : items.getKeys(false)) configured.put(key, items.getDouble(key, -1.0));
     if (configured.equals(normalized)) return false;
-
     getConfig().set(PATH_COMPOSTER_ITEMS, normalized);
     return true;
-  }
-
-  /// Keeps composter chances inside Bukkit's probability range.
-  ///
-  /// @param chance configured chance
-  /// @return chance clamped to the inclusive `0.0` to `1.0` range
-  private double normalizeComposterChance(double chance) {
-    if (chance < 0.0) return 0.0;
-    if (chance > 1.0) return 1.0;
-    return chance;
   }
 
   /// Writes back the active crop material list after invalid entries have been ignored.
@@ -306,14 +282,9 @@ public final class FMConfig extends BaseConfig {
   /// @param cropRegistry active crop registry
   /// @return true when the configuration was changed
   private boolean validateCropMaterials(CropRegistry cropRegistry) {
-    List<String> normalized =
-        cropRegistry.getActiveCropMaterials().stream().map(Material::name).toList();
-    List<String> configured =
-        getConfig().getStringList(PATH_CROPS).stream()
-            .map(value -> value.strip().toUpperCase(Locale.ROOT))
-            .toList();
+    List<String> normalized = cropRegistry.getActiveCropMaterials().stream().map(Material::name).toList();
+    List<String> configured = getConfig().getStringList(PATH_CROPS).stream().map(value -> value.strip().toUpperCase(Locale.ROOT)).toList();
     if (configured.equals(normalized)) return false;
-
     getConfig().set(PATH_CROPS, normalized);
     return true;
   }
@@ -326,7 +297,6 @@ public final class FMConfig extends BaseConfig {
     Set<RegionKey> validRegions = regionService.getWatchedRegions();
     List<String> normalized = validRegions.stream().map(RegionKey::asString).toList();
     if (getConfig().getStringList(PATH_WATCHED_REGIONS).equals(normalized)) return false;
-
     getConfig().set(PATH_WATCHED_REGIONS, normalized);
     return true;
   }

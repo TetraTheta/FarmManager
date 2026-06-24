@@ -9,9 +9,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /// Provides convenience accessors for Bukkit `config.yml` values.
 ///
-/// Missing paths are written with caller-provided defaults. Runtime resources such as listeners,
-/// commands, and scheduled tasks should be wired by the plugin runtime, not by configuration
-/// classes.
+/// Missing paths are written with caller-provided defaults. Runtime resources such as listeners, commands, and scheduled tasks should be wired by the
+/// plugin runtime, not by configuration classes.
 ///
 /// Example:
 /// ```java
@@ -75,12 +74,25 @@ public abstract class BaseConfig {
     }
   }
 
-  /// Get config value as `double` from given path or default value if the path does not present,
-  /// with minimum/maximum value.
+  /// Get config value as `double` from given path with default if the path does not present, with default minimum value as `0` and maximum value as
+  /// `100`.
+  ///
   /// This will create the path with given default value if the path doesn't exist.
   ///
-  /// You can set minimum value and maximum value of the value. If the value of the path is outside
-  /// the boundary, it will be force-set to nearest boundary value.
+  /// If the value of the path is outside the boundary, it will be force-set to nearest boundary value.
+  ///
+  /// @param path Config path to get value from
+  /// @param def  Default value if the path doesn't exist.
+  /// @return Config value as `double`
+  public double getDouble(String path, double def) {
+    return getDouble(path, def, 0, 100);
+  }
+
+  /// Get config value as `double` from given path or default value if the path does not present, with minimum/maximum value. This will create the
+  /// path with given default value if the path doesn't exist.
+  ///
+  /// You can set minimum value and maximum value of the value. If the value of the path is outside the boundary, it will be force-set to nearest
+  /// boundary value.
   ///
   /// @param path Config path to get value from
   /// @param def  Default value if the path doesn't exist.
@@ -105,28 +117,26 @@ public abstract class BaseConfig {
     }
   }
 
-  /// Get config value as `double` from given path with default if the path does not present,
-  /// with default minimum value as `0` and maximum value as `100`.
+  /// Get config value as `int` from given path with default if the path does not present, with default minimum value as `0` and maximum value as
+  /// `100`.
   ///
   /// This will create the path with given default value if the path doesn't exist.
   ///
-  /// If the value of the path is outside the boundary, it will be force-set to nearest boundary
-  /// value.
+  /// If the value of the path is outside the boundary, it will be force-set to nearest boundary value.
   ///
   /// @param path Config path to get value from
   /// @param def  Default value if the path doesn't exist.
-  /// @return Config value as `double`
-  public double getDouble(String path, double def) {
-    return getDouble(path, def, 0, 100);
+  /// @return Config value as `int`
+  public int getInt(String path, int def) {
+    return getInt(path, def, 0, 100);
   }
 
-  /// Get config value as `int` from given path with default value if the path does not present,
-  /// with minimum/maximum value.
+  /// Get config value as `int` from given path with default value if the path does not present, with minimum/maximum value.
   ///
   /// This will create the path with given default value if the path doesn't exist.
   ///
-  /// You can set minimum value and maximum value of the value. If the value of the path is outside
-  /// the boundary, it will be force-set to nearest boundary value.
+  /// You can set minimum value and maximum value of the value. If the value of the path is outside the boundary, it will be force-set to nearest
+  /// boundary value.
   ///
   /// @param path Config path to get value from
   /// @param def  Default value if the path doesn't exist.
@@ -151,21 +161,6 @@ public abstract class BaseConfig {
     }
   }
 
-  /// Get config value as `int` from given path with default if the path does not present,
-  /// with default minimum value as `0` and maximum value as `100`.
-  ///
-  /// This will create the path with given default value if the path doesn't exist.
-  ///
-  /// If the value of the path is outside the boundary, it will be force-set to nearest boundary
-  /// value.
-  ///
-  /// @param path Config path to get value from
-  /// @param def  Default value if the path doesn't exist.
-  /// @return Config value as `int`
-  public int getInt(String path, int def) {
-    return getInt(path, def, 0, 100);
-  }
-
   /// Get config value as `List` from given path with default if the path does not present.
   ///
   /// This will create the path with given default value if the path doesn't exist.
@@ -182,13 +177,26 @@ public abstract class BaseConfig {
     }
   }
 
-  /// Get config value as `long` from given path with default if the path does not present, with
-  /// minimum/maximum value.
+  /// Get config value as `long` from given path with default if the path does not present, with default minimum value as `0` and maximum value as
+  /// `100`.
   ///
   /// This will create the path with given default value if the path doesn't exist.
   ///
-  /// You can set minimum value and maximum value of the value. If the value of the path is outside
-  /// of the boundary, it will be force-set to nearest boundary value.
+  /// If the value of the path is outside the boundary, it will be force-set to nearest boundary value.
+  ///
+  /// @param path Config path to get value from
+  /// @param def  Default value if the path doesn't exist.
+  /// @return Config value as `long`
+  public long getLong(String path, long def) {
+    return getLong(path, def, 0, 100);
+  }
+
+  /// Get config value as `long` from given path with default if the path does not present, with minimum/maximum value.
+  ///
+  /// This will create the path with given default value if the path doesn't exist.
+  ///
+  /// You can set minimum value and maximum value of the value. If the value of the path is outside of the boundary, it will be force-set to nearest
+  /// boundary value.
   ///
   /// @param path Config path to get value from
   /// @param def  Default value if the path doesn't exist.
@@ -211,21 +219,6 @@ public abstract class BaseConfig {
       config.set(path, def);
       return def;
     }
-  }
-
-  /// Get config value as `long` from given path with default if the path does not present,
-  /// with default minimum value as `0` and maximum value as `100`.
-  ///
-  /// This will create the path with given default value if the path doesn't exist.
-  ///
-  /// If the value of the path is outside the boundary, it will be force-set to nearest boundary
-  /// value.
-  ///
-  /// @param path Config path to get value from
-  /// @param def  Default value if the path doesn't exist.
-  /// @return Config value as `long`
-  public long getLong(String path, long def) {
-    return getLong(path, def, 0, 100);
   }
 
   /// Get config value as `String` from given path or default value if the path does not present.

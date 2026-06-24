@@ -5,7 +5,6 @@ package io.github.tetratheta.farmmanager.region;
 /// @param status resolution status
 /// @param region resolved region key, or null when not resolved
 public record RegionResolution(Status status, RegionKey region) {
-
   /// Creates a successful resolution.
   ///
   /// @param region resolved region key
