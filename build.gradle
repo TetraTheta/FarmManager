@@ -20,20 +20,15 @@ def releaseChannel = "release" // Release Channel (Modrinth & Hangar)
 
 repositories {
   mavenCentral()
-  maven {
-    url = uri("https://repo.papermc.io/repository/maven-public/")
-  }
-  maven {
-    url = uri("https://maven.enginehub.org/repo/")
-  }
-  maven {
-    url = uri("https://oss.sonatype.org/content/groups/public/")
-  }
+  maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
+  maven { url = uri("https://maven.enginehub.org/repo/") }
+  maven { url = uri("https://oss.sonatype.org/content/groups/public/") }
 }
 
 dependencies {
   //noinspection VulnerableLibrariesLocal
   compileOnly("io.papermc.paper:paper-api:$verPaper")
+  implementation("io.github.tetratheta:mol:0.0.1")
   compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.17") {
     exclude group: "org.apache.logging.log4j", module: "log4j-bom"
   }
@@ -67,6 +62,11 @@ processResources {
   filesMatching("paper-plugin.yml") {
     expand(props)
   }
+}
+
+jar {
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 // Publish
