@@ -23,6 +23,8 @@ By default, FarmManager supports wheat, carrots, potatoes, beetroots, and nether
 
 Use `/fm reload` after editing the configuration to apply changes without restarting the server.
 
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
 ## Configuration
 
 ```yml
